@@ -1,0 +1,43 @@
+python -m venv venv
+venv\Scripts\activate
+source venv/bin/activate
+
+pip install django
+django-admin startproject dts_project .
+python manage.py runserver
+
+python manage.py startapp letters
+
+
+python manage.py makemigrations
+
+
+cd ..
+venv\Scripts\activate
+
+
+pip install psycopg2-binary
+
+python manage.py makemigrations
+python manage.py migrate
+
+
+
+python manage.py createsuperuser ************** ወደ Admin Panel ለመግባት መጀመሪያ ዋና የተጠቃሚ ስምና ፓስወርድ መፍጠር አለብን። በተርሚናልህ ላይ የሚከተለውን ጻፍና Enter በል
+
+python manage.py createsuperuser ***** any time can chage to the user and password
+http://127.0.0.1:8000/admin/
+admin username
+pgAdmin4 password
+
+
+db password 654321
+
+
+
+cd ..
+venv\Scripts\activate
+python manage.py makemigrations letters
+python manage.py migrate
+python manage.py runserver
+
