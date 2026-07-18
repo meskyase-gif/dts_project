@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <title>ደብዳቤ ማስተካከያ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5" style="max-width: 700px;">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">✏️ የደብዳቤ መረጃ ማስተካከያ ፎርም</h4>
+            </div>
+            <!-- ፋይል ስለሚኖረው enctype="multipart/form-data" የግድ ያስፈልጋል -->
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label">የደብዳቤ ቁጥር</label>{{ form.letter_number }}</div>
+                        <div class="col-md-6 mb-3"><label class="form-label">ላኪ (መሥሪያ ቤት)</label>{{ form.sender }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label">ጉዳይ/ርዕስ</label>{{ form.subject }}</div>
+                        <div class="col-md-6 mb-3"><label class="form-label">የተመራለት ሰው/ክፍል</label>{{ form.assigned_to }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label">ደብዳቤውን የመራው ኃላፊ</label>{{ form.assigned_by }}</div>
+                        <div class="col-md-6 mb-3"><label class="form-label">ደረጃ (Status)</label>{{ form.status }}</div>
+                    </div>
+                    <div class="mb-3"><label class="form-label">ማብራሪያ</label>{{ form.description }}</div>
+                    <div class="mb-3">
+                        <label class="form-label">ስካን የተደረገ ደብዳቤ (PDF/Image)</label>
+                        {{ form.scanned_copy }}
+                        {% if letter.scanned_copy %}
+                            <div class="mt-2">
+                                <span class="text-success">የተጫነ ፋይል አለ፦</span> 
+                                <a href="{{ letter.scanned_copy.url }}" target="_blank" class="btn btn-sm btn-outline-primary">ፋይሉን ክፈት</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary">ተመለስ</a>
+                    <button type="submit" class="btn btn-warning">ለውጦችን መዝግብ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

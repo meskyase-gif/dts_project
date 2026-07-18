@@ -18,7 +18,8 @@ class Letter(models.Model):
     
     # አዳዲስ የተጨመሩት
     assign_date = models.DateField(default=timezone.now, verbose_name="ደብዳቤው የተመራበት ቀን")
-    assigned_by = models.CharField(max_length=255, default="ያልተገለጸ", verbose_name="ደብዳቤውን የመራው ኃላፊ")
+    assigned_by = models.CharField(max_length=255, verbose_name="ደብዳቤውን የመራው ኃላፊ")
+    scanned_copy = models.FileField(upload_to='scanned_letters/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.letter_number} - {self.subject}"
