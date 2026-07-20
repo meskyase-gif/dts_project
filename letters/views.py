@@ -55,13 +55,16 @@ def dashboard(request):
     return render(request, 'letters/dashboard.html', {'letters': letters, 'form': form, 'query': query})
 
 @login_required
+
 def create_letter(request):
     if request.method == 'POST':
-        form = LetterForm(request.POST)
+        form = LetterForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('dashboard')
-    return redirect('dashboard')
+    else:
+        form = LetterForm()
+    return render(request, 'letters/create_letter.html', {'form': form})
 
 @login_required
 def export_excel(request):
