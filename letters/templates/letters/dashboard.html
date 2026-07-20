@@ -45,23 +45,27 @@
         
         <!-- የቁልፎች እና የፍለጋ ክፍል -->
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-            <div class="d-flex gap-2">
-                <a href="{% url 'create_letter' %}" class="btn btn-success px-4">+ አዲስ ደብዳቤ መመዝገብ</a>
-                <!-- የኤክሴል ማውረጃ ካለህ ሊንኩን እዚህ አስተካክለው -->
-                <a href="#" class="btn btn-outline-success">📊 በExcel አውርድ</a>
-            </div>
-            
-            <!-- የፍለጋ ፎርም -->
-            <form action="{% url 'dashboard' %}" method="GET" class="d-flex gap-2" style="max-width: 500px; width: 100%;">
-                <input type="text" name="q" value="{{ request.GET.q|default:'' }}" class="form-control" placeholder="በደብዳቤ ቁጥር፣ በላኪ ወይም በጉዳይ ፈልግ...">
-                <button type="submit" class="btn btn-primary px-4">ፈልግ</button>
-                {% if request.GET.q %}
-                    <a href="{% url 'dashboard' %}" class="btn btn-secondary">አጽዳ</a>
-                {% endif %}
-            </form>
-        </div>
+    <div class="d-flex gap-2">
+        <!-- 1. አዲስ ደብዳቤ መመዝገቢያ በተን -->
+        <a href="{% url 'create_letter' %}" class="btn btn-success">
+            + አዲስ ደብዳቤ መመዝገብ
+        </a>
 
-        <!-- ዋናው የይዘት ካርድ -->
+        <!-- 2. በExcel አውርድ በተን -->
+        <a href="{% url 'export_excel' %}" class="btn btn-outline-success">
+            📊 በExcel አውርድ
+        </a>
+    </div>
+
+    <!-- 3. የፍለጋ (Search) ፎርም -->
+    <form method="get" action="{% url 'dashboard' %}" class="d-flex gap-2">
+        <input type="text" name="q" value="{{ search_query|default:'' }}" class="form-control" placeholder="በደብዳቤ ቁጥር፣ ላኪ ወይም ጉዳይ ፈልግ...">
+        <button type="submit" class="btn btn-primary">ፈልግ</button>
+    </form>
+</div>
+            
+           
+       <!-- ዋናው የይዘት ካርድ -->
         <div class="card p-4 bg-white mb-5">
             <h5 class="card-title mb-4">📋 የተመዘገቡ ደብዳቤዎች ዝርዝር</h5>
 
