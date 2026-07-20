@@ -9,6 +9,14 @@ urlpatterns = [
     path('', views.dashboard, name='dashboard'),
     path('login/', auth_views.LoginView.as_view(template_name='letters/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+
+    #የይለፍ ቃል መቀየሪያ URL
+    path('change-password/', 
+         auth_views.PasswordChangeView.as_view(
+             template_name='letters/change_password.html',
+             success_url='/'
+         ), 
+         name='password_change'),
     path('create/', views.create_letter, name='create_letter'),
     path('export/excel/', views.export_excel, name='export_excel'),
     path('change-password/', UserPasswordChangeView.as_view(), name='change_password'),
