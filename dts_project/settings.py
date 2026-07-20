@@ -1,3 +1,4 @@
+import os
 """
 Django settings for dts_project project.
 
