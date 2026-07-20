@@ -12,6 +12,7 @@
         .card { border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .nav-tabs .nav-link { color: #495057; font-weight: 500; }
         .nav-tabs .nav-link.active { font-weight: bold; background-color: #fff; }
+        .toggle-btn { font-size: 1.1rem; font-weight: 600; padding: 12px 20px; border-radius: 8px; width: 100%; text-align: left; }
     </style>
 </head>
 <body>
@@ -60,235 +61,245 @@
             </form>
         </div>
             
-       <!-- ዋናው የይዘት ካርድ -->
-        <div class="card p-4 bg-white mb-5">
-            <h5 class="card-title mb-4">📋 የተመዘገቡ ደብዳቤዎች ዝርዝር</h5>
+        <!-- ተደብቆ የሚከፈት የዝርዝር በተን (Toggle Button) -->
+        <div class="mb-3">
+            <button class="btn btn-primary toggle-btn d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#lettersListCollapse" aria-expanded="false" aria-controls="lettersListCollapse">
+                <span>📁 የተመዘገቡ ደብዳቤዎች ዝርዝር ለማየት እዚህ ይጫኑ</span>
+                <span class="badge bg-light text-dark">{{ letters|length }} ደብዳቤዎች</span>
+            </button>
+        </div>
 
-            <!-- ታቦች (Tabs) -->
-            <ul class="nav nav-tabs" id="letterTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-letters" type="button" role="tab">
-                        ሁሉም ደብዳቤዎች ({{ letters|length }})
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="new-tab" data-bs-toggle="tab" data-bs-target="#new-letters" type="button" role="tab">
-                        🔵 አዲስ
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress-letters" type="button" role="tab">
-                        🟡 በሂደት ላይ
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed-letters" type="button" role="tab">
-                        🟢 የተጠናቀቁ
-                    </button>
-                </li>
-            </ul>
+        <!-- ዋናው የይዘት ካርድ (በነባሪነት Hidden/Collapse የሆነ) -->
+        <div class="collapse mb-5" id="lettersListCollapse">
+            <div class="card p-4 bg-white">
+                <h5 class="card-title mb-4">📋 የተመዘገቡ ደብዳቤዎች ዝርዝር</h5>
 
-            <!-- የታቦቹ ይዘት (Tables) -->
-            <div class="tab-content mt-4" id="letterTabsContent">
-                
-                <!-- 1. የሁሉም ደብዳቤዎች ሰንጠረዥ -->
-                <div class="tab-pane fade show active" id="all-letters" role="tabpanel">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>የደብዳቤ ቁጥር</th>
-                                    <th>ላኪ (መሥሪያ ቤት)</th>
-                                    <th>ጉዳይ/ርዕስ</th>
-                                    <th>የተመራለት ክፍል</th>
-                                    <th>የተመራበት ቀን</th>
-                                    <th>ደረጃ</th>
-                                    <th>ማብራሪያ</th>
-                                    <th class="text-center">የተያያዘ ፋይል</th>
-                                    <th class="text-center">ድርጊት (Actions)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for letter in letters %}
-                                <tr>
-                                    <td><strong>{{ letter.letter_number }}</strong></td>
-                                    <td>{{ letter.sender }}</td>
-                                    <td>{{ letter.subject }}</td>
-                                    <td>{{ letter.assigned_to }}</td>
-                                    <td>{{ letter.assign_date|date:"Y-m-d" }}</td>
-                                    <td>
-                                        {% if letter.status == 'new' %}<span class="badge bg-primary">አዲስ</span>
-                                        {% elif letter.status == 'in_progress' %}<span class="badge bg-warning text-dark">በሂደት ላይ</span>
-                                        {% else %}<span class="badge bg-success">ተጠናቋል</span>{% endif %}
-                                    </td>
-                                    <td><small class="text-muted">{{ letter.description|default:"-" }}</small></td>
-                                    <td class="text-center">
-                                        {% if letter.scanned_copy %}
-                                            <a href="{{ letter.scanned_copy.url }}" target="_blank" class="btn btn-outline-info btn-sm py-1 px-2">📄 ፋይል እይ</a>
-                                        {% else %}<span class="text-muted" style="font-size: 0.85rem;">የለም</span>{% endif %}
-                                    </td>
-                                    <td>
-                                        <div class="d-flex gap-1 justify-content-center">
-                                            <a href="{% url 'edit_letter' letter.id %}" class="btn btn-warning btn-sm py-1 px-2">✏️ አስተካክል</a>
-                                            <form action="{% url 'delete_letter' letter.id %}" method="POST" onsubmit="return confirm('እርግጠኛ ነዎት ይህ ደብዳቤ እንዲጠፋ ይፈልጋሉ?');" class="m-0">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger btn-sm py-1 px-2">🗑️ ሰርዝ</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr><td colspan="9" class="text-center py-4 text-muted">ምንም የተመዘገበ ደብዳቤ አልተገኘም።</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                <!-- ታቦች (Tabs) -->
+                <ul class="nav nav-tabs" id="letterTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-letters" type="button" role="tab">
+                            ሁሉም ደብዳቤዎች ({{ letters|length }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="new-tab" data-bs-toggle="tab" data-bs-target="#new-letters" type="button" role="tab">
+                            🔵 አዲስ
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress-letters" type="button" role="tab">
+                            🟡 በሂደት ላይ
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed-letters" type="button" role="tab">
+                            🟢 የተጠናቀቁ
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- የታቦቹ ይዘት (Tables) -->
+                <div class="tab-content mt-4" id="letterTabsContent">
+                    
+                    <!-- 1. የሁሉም ደብዳቤዎች ሰንጠረዥ -->
+                    <div class="tab-pane fade show active" id="all-letters" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>የደብዳቤ ቁጥር</th>
+                                        <th>ላኪ (መሥሪያ ቤት)</th>
+                                        <th>ጉዳይ/ርዕስ</th>
+                                        <th>የተመራለት ክፍል</th>
+                                        <th>የተመራበት ቀን</th>
+                                        <th>ደረጃ</th>
+                                        <th>ማብራሪያ</th>
+                                        <th class="text-center">የተያያዘ ፋይል</th>
+                                        <th class="text-center">ድርጊት (Actions)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for letter in letters %}
+                                    <tr>
+                                        <td><strong>{{ letter.letter_number }}</strong></td>
+                                        <td>{{ letter.sender }}</td>
+                                        <td>{{ letter.subject }}</td>
+                                        <td>{{ letter.assigned_to }}</td>
+                                        <td>{{ letter.assign_date|date:"Y-m-d" }}</td>
+                                        <td>
+                                            {% if letter.status == 'new' %}<span class="badge bg-primary">አዲስ</span>
+                                            {% elif letter.status == 'in_progress' %}<span class="badge bg-warning text-dark">በሂደት ላይ</span>
+                                            {% else %}<span class="badge bg-success">ተጠናቋል</span>{% endif %}
+                                        </td>
+                                        <td><small class="text-muted">{{ letter.description|default:"-" }}</small></td>
+                                        <td class="text-center">
+                                            {% if letter.scanned_copy %}
+                                                <a href="{{ letter.scanned_copy.url }}" target="_blank" class="btn btn-outline-info btn-sm py-1 px-2">📄 ፋይል እይ</a>
+                                            {% else %}<span class="text-muted" style="font-size: 0.85rem;">የለም</span>{% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-1 justify-content-center">
+                                                <a href="{% url 'edit_letter' letter.id %}" class="btn btn-warning btn-sm py-1 px-2">✏️ አስተካክል</a>
+                                                <form action="{% url 'delete_letter' letter.id %}" method="POST" onsubmit="return confirm('እርግጠኛ ነዎት ይህ ደብዳቤ እንዲጠፋ ይፈልጋሉ?');" class="m-0">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger btn-sm py-1 px-2">🗑️ ሰርዝ</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="9" class="text-center py-4 text-muted">ምንም የተመዘገበ ደብዳቤ አልተገኘም።</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
 
-                <!-- 2. የአዲስ ደብዳቤዎች ሰንጠረዥ -->
-                <div class="tab-pane fade" id="new-letters" role="tabpanel">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>የደብዳቤ ቁጥር</th>
-                                    <th>ላኪ (መሥሪያ ቤት)</th>
-                                    <th>ጉዳይ/ርዕስ</th>
-                                    <th>የተመራለት ክፍል</th>
-                                    <th>የተመራበት ቀን</th>
-                                    <th>ማብራሪያ</th>
-                                    <th class="text-center">የተያያዘ ፋይል</th>
-                                    <th class="text-center">ድርጊት (Actions)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for letter in letters %}
-                                {% if letter.status == 'new' %}
-                                <tr>
-                                    <td><strong>{{ letter.letter_number }}</strong></td>
-                                    <td>{{ letter.sender }}</td>
-                                    <td>{{ letter.subject }}</td>
-                                    <td>{{ letter.assigned_to }}</td>
-                                    <td>{{ letter.assign_date|date:"Y-m-d" }}</td>
-                                    <td><small class="text-muted">{{ letter.description|default:"-" }}</small></td>
-                                    <td class="text-center">
-                                        {% if letter.scanned_copy %}
-                                            <a href="{{ letter.scanned_copy.url }}" target="_blank" class="btn btn-outline-info btn-sm py-1 px-2">📄 ፋይል እይ</a>
-                                        {% else %}<span class="text-muted" style="font-size: 0.85rem;">የለም</span>{% endif %}
-                                    </td>
-                                    <td>
-                                        <div class="d-flex gap-1 justify-content-center">
-                                            <a href="{% url 'edit_letter' letter.id %}" class="btn btn-warning btn-sm py-1 px-2">✏️ አስተካክል</a>
-                                            <form action="{% url 'delete_letter' letter.id %}" method="POST" onsubmit="return confirm('እርግጠኛ ነዎት?');" class="m-0">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger btn-sm py-1 px-2">🗑️ ሰርዝ</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <!-- 2. የአዲስ ደብዳቤዎች ሰንጠረዥ -->
+                    <div class="tab-pane fade" id="new-letters" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>የደብዳቤ ቁጥር</th>
+                                        <th>ላኪ (መሥሪያ ቤት)</th>
+                                        <th>ጉዳይ/ርዕስ</th>
+                                        <th>የተመራለት ክፍል</th>
+                                        <th>የተመራበት ቀን</th>
+                                        <th>ማብራሪያ</th>
+                                        <th class="text-center">የተያያዘ ፋይል</th>
+                                        <th class="text-center">ድርጊት (Actions)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for letter in letters %}
+                                    {% if letter.status == 'new' %}
+                                    <tr>
+                                        <td><strong>{{ letter.letter_number }}</strong></td>
+                                        <td>{{ letter.sender }}</td>
+                                        <td>{{ letter.subject }}</td>
+                                        <td>{{ letter.assigned_to }}</td>
+                                        <td>{{ letter.assign_date|date:"Y-m-d" }}</td>
+                                        <td><small class="text-muted">{{ letter.description|default:"-" }}</small></td>
+                                        <td class="text-center">
+                                            {% if letter.scanned_copy %}
+                                                <a href="{{ letter.scanned_copy.url }}" target="_blank" class="btn btn-outline-info btn-sm py-1 px-2">📄 ፋይል እይ</a>
+                                            {% else %}<span class="text-muted" style="font-size: 0.85rem;">የለም</span>{% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-1 justify-content-center">
+                                                <a href="{% url 'edit_letter' letter.id %}" class="btn btn-warning btn-sm py-1 px-2">✏️ አስተካክል</a>
+                                                <form action="{% url 'delete_letter' letter.id %}" method="POST" onsubmit="return confirm('እርግጠኛ ነዎት?');" class="m-0">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger btn-sm py-1 px-2">🗑️ ሰርዝ</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
 
-                <!-- 3. በሂደት ላይ ያሉ ደብዳቤዎች ሰንጠረዥ -->
-                <div class="tab-pane fade" id="progress-letters" role="tabpanel">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>የደብዳቤ ቁጥር</th>
-                                    <th>ላኪ (መሥሪያ ቤት)</th>
-                                    <th>ጉዳይ/ርዕስ</th>
-                                    <th>የተመራለት ክፍል</th>
-                                    <th>የተመራበት ቀን</th>
-                                    <th>ማብራሪያ</th>
-                                    <th class="text-center">የተያያዘ ፋይል</th>
-                                    <th class="text-center">ድርጊት (Actions)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for letter in letters %}
-                                {% if letter.status == 'in_progress' %}
-                                <tr>
-                                    <td><strong>{{ letter.letter_number }}</strong></td>
-                                    <td>{{ letter.sender }}</td>
-                                    <td>{{ letter.subject }}</td>
-                                    <td>{{ letter.assigned_to }}</td>
-                                    <td>{{ letter.assign_date|date:"Y-m-d" }}</td>
-                                    <td><small class="text-muted">{{ letter.description|default:"-" }}</small></td>
-                                    <td class="text-center">
-                                        {% if letter.scanned_copy %}
-                                            <a href="{{ letter.scanned_copy.url }}" target="_blank" class="btn btn-outline-info btn-sm py-1 px-2">📄 ፋይል እይ</a>
-                                        {% else %}<span class="text-muted" style="font-size: 0.85rem;">የለም</span>{% endif %}
-                                    </td>
-                                    <td>
-                                        <div class="d-flex gap-1 justify-content-center">
-                                            <a href="{% url 'edit_letter' letter.id %}" class="btn btn-warning btn-sm py-1 px-2">✏️ አስተካክል</a>
-                                            <form action="{% url 'delete_letter' letter.id %}" method="POST" onsubmit="return confirm('እርግጠኛ ነዎት?');" class="m-0">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger btn-sm py-1 px-2">🗑️ ሰርዝ</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <!-- 3. በሂደት ላይ ያሉ ደብዳቤዎች ሰንጠረዥ -->
+                    <div class="tab-pane fade" id="progress-letters" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>የደብዳቤ ቁጥር</th>
+                                        <th>ላኪ (መሥሪያ ቤት)</th>
+                                        <th>ጉዳይ/ርዕስ</th>
+                                        <th>የተመራለት ክፍል</th>
+                                        <th>የተመራበት ቀን</th>
+                                        <th>ማብራሪያ</th>
+                                        <th class="text-center">የተያያዘ ፋይል</th>
+                                        <th class="text-center">ድርጊት (Actions)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for letter in letters %}
+                                    {% if letter.status == 'in_progress' %}
+                                    <tr>
+                                        <td><strong>{{ letter.letter_number }}</strong></td>
+                                        <td>{{ letter.sender }}</td>
+                                        <td>{{ letter.subject }}</td>
+                                        <td>{{ letter.assigned_to }}</td>
+                                        <td>{{ letter.assign_date|date:"Y-m-d" }}</td>
+                                        <td><small class="text-muted">{{ letter.description|default:"-" }}</small></td>
+                                        <td class="text-center">
+                                            {% if letter.scanned_copy %}
+                                                <a href="{{ letter.scanned_copy.url }}" target="_blank" class="btn btn-outline-info btn-sm py-1 px-2">📄 ፋይል እይ</a>
+                                            {% else %}<span class="text-muted" style="font-size: 0.85rem;">የለም</span>{% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-1 justify-content-center">
+                                                <a href="{% url 'edit_letter' letter.id %}" class="btn btn-warning btn-sm py-1 px-2">✏️ አስተካክል</a>
+                                                <form action="{% url 'delete_letter' letter.id %}" method="POST" onsubmit="return confirm('እርግጠኛ ነዎት?');" class="m-0">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger btn-sm py-1 px-2">🗑️ ሰርዝ</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
 
-                <!-- 4. የተጠናቀቁ ደብዳቤዎች ሰንጠረዥ -->
-                <div class="tab-pane fade" id="completed-letters" role="tabpanel">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>የደብዳቤ ቁጥር</th>
-                                    <th>ላኪ (መሥሪያ ቤት)</th>
-                                    <th>ጉዳይ/ርዕስ</th>
-                                    <th>የተመራለት ክፍል</th>
-                                    <th>የተመራበት ቀን</th>
-                                    <th>ማብራሪያ</th>
-                                    <th class="text-center">የተያያዘ ፋይል</th>
-                                    <th class="text-center">ድርጊት (Actions)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for letter in letters %}
-                                {% if letter.status == 'completed' %}
-                                <tr>
-                                    <td><strong>{{ letter.letter_number }}</strong></td>
-                                    <td>{{ letter.sender }}</td>
-                                    <td>{{ letter.subject }}</td>
-                                    <td>{{ letter.assigned_to }}</td>
-                                    <td>{{ letter.assign_date|date:"Y-m-d" }}</td>
-                                    <td><small class="text-muted">{{ letter.description|default:"-" }}</small></td>
-                                    <td class="text-center">
-                                        {% if letter.scanned_copy %}
-                                            <a href="{{ letter.scanned_copy.url }}" target="_blank" class="btn btn-outline-info btn-sm py-1 px-2">📄 ፋይል እይ</a>
-                                        {% else %}<span class="text-muted" style="font-size: 0.85rem;">የለም</span>{% endif %}
-                                    </td>
-                                    <td>
-                                        <div class="d-flex gap-1 justify-content-center">
-                                            <a href="{% url 'edit_letter' letter.id %}" class="btn btn-warning btn-sm py-1 px-2">✏️ አስተካክል</a>
-                                            <form action="{% url 'delete_letter' letter.id %}" method="POST" onsubmit="return confirm('እርግጠኛ ነዎት?');" class="m-0">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger btn-sm py-1 px-2">🗑️ ሰርዝ</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <!-- 4. የተጠናቀቁ ደብዳቤዎች ሰንጠረዥ -->
+                    <div class="tab-pane fade" id="completed-letters" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>የደብዳቤ ቁጥር</th>
+                                        <th>ላኪ (መሥሪያ ቤት)</th>
+                                        <th>ጉዳይ/ርዕስ</th>
+                                        <th>የተመራለት ክፍል</th>
+                                        <th>የተመራበት ቀን</th>
+                                        <th>ማብራሪያ</th>
+                                        <th class="text-center">የተያያዘ ፋይል</th>
+                                        <th class="text-center">ድርጊት (Actions)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for letter in letters %}
+                                    {% if letter.status == 'completed' %}
+                                    <tr>
+                                        <td><strong>{{ letter.letter_number }}</strong></td>
+                                        <td>{{ letter.sender }}</td>
+                                        <td>{{ letter.subject }}</td>
+                                        <td>{{ letter.assigned_to }}</td>
+                                        <td>{{ letter.assign_date|date:"Y-m-d" }}</td>
+                                        <td><small class="text-muted">{{ letter.description|default:"-" }}</small></td>
+                                        <td class="text-center">
+                                            {% if letter.scanned_copy %}
+                                                <a href="{{ letter.scanned_copy.url }}" target="_blank" class="btn btn-outline-info btn-sm py-1 px-2">📄 ፋይል እይ</a>
+                                            {% else %}<span class="text-muted" style="font-size: 0.85rem;">የለም</span>{% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-1 justify-content-center">
+                                                <a href="{% url 'edit_letter' letter.id %}" class="btn btn-warning btn-sm py-1 px-2">✏️ አስተካክል</a>
+                                                <form action="{% url 'delete_letter' letter.id %}" method="POST" onsubmit="return confirm('እርግጠኛ ነዎት?');" class="m-0">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger btn-sm py-1 px-2">🗑️ ሰርዝ</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
 
+                </div>
             </div>
         </div>
     </div>
